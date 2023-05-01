@@ -13,12 +13,27 @@
     <div class="mb-3">
       <input class="form-control" type="file" id="formFile" />
     </div>
-    <% pictures.forEach(function(picture){ %>
+    <% if(pictures){  %>
+      <% pictures.forEach(function(picture){ %>
     <div class="text-center">
-      <img class="mb-3" src="http://localhost:3000/<%=picture%>" style="width: 100%" />
+      <img
+        class="mb-3"
+        src="http://localhost:3000/<%=picture%>"
+        style="width: 100%"
+      />
       <h4><%=picture%></h4>
     </div>
-    <% });%>
+    <% }) %>
+    <% }else{ %>
+      <div class="text-center">
+        <img
+          class="mb-3"
+          src="http://localhost:3000/<%=picture%>"
+          style="width: 100%"
+        />
+        <h4><%=picture%></h4>
+      </div>
+      <% } %>
     <script src="../javascripts/pictures.js"></script>
   </body>
 </html>

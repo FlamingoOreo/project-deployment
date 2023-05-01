@@ -1,15 +1,22 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-const fs = require('fs');
-var path = require('path');
+const fs = require("fs");
+var path = require("path");
 
-router.get('/', function(req, res, next) {
-    const pictures = fs.readdirSync(path.join(__dirname, '../pictures/'));
-    res.render('pictures', { pictures: pictures});
+router.get("/:pictureName", function (req, res, next) {
+    const pictures = fs.readdirSync(path.join(__dirname, "../pictures/"));
+    const index = pictures.indexOf(req.params.pictureName);
+    res.render("pictures", {pictures: false, picture: pictures[index] });
   });
-router.post('/', function(req, res, next) {
+router.get("/", function (req, res, next) {
+  const pictures = fs.readdirSync(path.join(__dirname, "../pictures/"));
+  res.render("pictures", { pictures: pictures });
+});
+
+
+router.post("/", function (req, res, next) {
   const file = req.files.file;
-  fs.writeFileSync(path.join(__dirname, '../pictures/', file.name), file.data);
+  fs.writeFileSync(path.join(__dirname, "../pictures/", file.name), file.data);
   res.end();
 });
 

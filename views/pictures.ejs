@@ -21,13 +21,10 @@
         </div>
     <% });%>
     <% }else{ %>
+      <% console.log(picture) %>
       <div class="text-center">
-        <img
-          class="mb-3"
-          src="http://localhost:3000/<%=picture%>"
-          style="width: 100%"
-        />
-        <h4><%=picture%></h4>
+        <img class="mb-3" src="data:image/png; base64, <%=picture.src%>" style="width:500px">
+        <h4><%=picture.name%></h4>
       </div>
       <% } %>
     <script src="../javascripts/pictures.js"></script>

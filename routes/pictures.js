@@ -3,43 +3,74 @@ var router = express.Router();
 const fs = require("fs");
 var path = require("path");
 const AWS = require("aws-sdk");
-const s3 = new AWS.S3()
+const s3 = new AWS.S3();
+const { requiresAuth } = require("express-openid-connect");
 
-// router.get("/:pictureName", function (req, res, next) {
-//     const pictures = fs.readdirSync(path.join(__dirname, "../pictures/"));
-//     const index = pictures.indexOf(req.params.pictureName);
-//     res.render("pictures", {pictures: false, picture: pictures[index] });
-//   });
-router.get("/", async function (req, res, next) {
+router.get("/:pictureName", requiresAuth(), async function (req, res, next) {
   var params = {
     Bucket: process.env.CYCLIC_BUCKET_NAME,
-    Delimiter: '/',
-    Prefix: 'public/'
+    Delimiter: "/",
+    Prefix: "public/",
   };
   var allObjects = await s3.listObjects(params).promise();
-  var keys = allObjects?.Contents.map( x=> x.Key)
-  const pictures = await Promise.all(keys.map(async (key) => {
-    let my_file = await s3.getObject({
-      Bucket: process.env.CYCLIC_BUCKET_NAME,
-      Key: key,
-    }).promise();
-    return {
-        src: Buffer.from(my_file.Body).toString('base64'),
-        name: key.split("/").pop()
-    }
-  }))
+  var keys = allObjects?.Contents.map((x) => x.Key);
+  const pictures = await Promise.all(
+    keys.map(async (key) => {
+      let my_file = await s3
+        .getObject({
+          Bucket: process.env.CYCLIC_BUCKET_NAME,
+          Key: key,
+        })
+        .promise();
+      return {
+        src: Buffer.from(my_file.Body).toString("base64"),
+        name: key.split("/").pop(),
+      };
+    })
+  );
+  const pictureName = req.params.pictureName;
+  const picture = pictures.find(picture => picture.name === pictureName);
+  if (picture) {
+    res.render("pictures", { pictures: false, picture: picture });
+  } else {
+    res.render("pictures", { pictures: pictures });
+  }
+});
+router.get("/", requiresAuth(), async function (req, res, next) {
+  var params = {
+    Bucket: process.env.CYCLIC_BUCKET_NAME,
+    Delimiter: "/",
+    Prefix: "public/",
+  };
+  var allObjects = await s3.listObjects(params).promise();
+  var keys = allObjects?.Contents.map((x) => x.Key);
+  const pictures = await Promise.all(
+    keys.map(async (key) => {
+      let my_file = await s3
+        .getObject({
+          Bucket: process.env.CYCLIC_BUCKET_NAME,
+          Key: key,
+        })
+        .promise();
+      return {
+        src: Buffer.from(my_file.Body).toString("base64"),
+        name: key.split("/").pop(),
+      };
+    })
+  );
   res.render("pictures", { pictures: pictures });
 });
 
-
-router.post('/', async function(req, res, next) {
+router.post("/", requiresAuth(), async function (req, res, next) {
   const file = req.files.file;
   console.log(req.files);
-  await s3.putObject({
-    Body: file.data,
-    Bucket: process.env.CYCLIC_BUCKET_NAME,
-    Key: "public/" + file.name,
-  }).promise()
+  await s3
+    .putObject({
+      Body: file.data,
+      Bucket: process.env.CYCLIC_BUCKET_NAME,
+      Key: "public/" + file.name,
+    })
+    .promise();
   res.end();
 });
 module.exports = router;

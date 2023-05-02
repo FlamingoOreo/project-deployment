@@ -7,6 +7,7 @@ const fileUpload = require('express-fileupload');
 
 var indexRouter = require('./routes/index');
 var picturesRouter = require('./routes/pictures');
+require('dotenv').config()
 
 var app = express();
 
